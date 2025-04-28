@@ -71,27 +71,64 @@ exports.createProduct = catchAsync(async (req, res, next) => {
 });
 
 exports.editProduct = catchAsync(async (req, res, next) => {
-  const id = req.params.id;
-  const product = {
-    name: req.body.name,
-    price: req.body.price,
-    quantity: req.body.quantity,
-    imageUrl: req.body.imageUrl,
-  };
-  const editedProduct = await Product.findByIdAndUpdate(id, product, {
-    new: true,
-    runValidators: true,
-  });
+  upload(req, res, async function (err) {
+    if (err) {
+      return res.status(400).json({ status: "fail", message: err.message });
+    }
 
-  if (!editedProduct) {
-    return new Error(`No document found with ID: ${req.params.id}`);
-  }
+    const id = req.params.id;
+    const updates = {
+      name: req.body.name,
+      price: req.body.price,
+      quantity: req.body.quantity,
+      machineLocation: req.body.machineLocation,
+    };
 
-  res.status(200).json({
-    status: "success",
-    data: {
-      product: editedProduct,
-    },
+    // If the user uploaded a new image
+    if (req.file) {
+      let cld_upload_stream = cloudinary.uploader.upload_stream({ folder: "uploads" }, async (error, result) => {
+        if (error) {
+          return res.status(500).json({ status: "fail", message: error.message });
+        }
+
+        updates.imageUrl = result.secure_url; // Add new image URL
+
+        const editedProduct = await Product.findByIdAndUpdate(id, updates, {
+          new: true,
+          runValidators: true,
+        });
+
+        if (!editedProduct) {
+          return next(new Error(`No document found with ID: ${req.params.id}`));
+        }
+
+        res.status(200).json({
+          status: "success",
+          data: {
+            product: editedProduct,
+          },
+        });
+      });
+
+      streamifier.createReadStream(req.file.buffer).pipe(cld_upload_stream);
+    } else {
+      // No new image uploaded, just update text fields
+      const editedProduct = await Product.findByIdAndUpdate(id, updates, {
+        new: true,
+        runValidators: true,
+      });
+
+      if (!editedProduct) {
+        return next(new Error(`No document found with ID: ${req.params.id}`));
+      }
+
+      res.status(200).json({
+        status: "success",
+        data: {
+          product: editedProduct,
+        },
+      });
+    }
   });
 });
 
