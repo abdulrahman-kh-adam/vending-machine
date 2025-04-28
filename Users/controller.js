@@ -224,7 +224,7 @@ exports.getAllUsers = catchAsync(async (req, res) => {
 });
 
 exports.deleteSelf = catchAsync(async (req, res) => {
-  await User.findByIdAndUpdate(req.user.id, { active: false });
+  await User.findByIdAndUpdate(req.user._id, { active: false });
 
   res.status(204).json({
     status: "success",
@@ -300,7 +300,7 @@ exports.createUser = catchAsync(async (req, res) => {
 });
 
 exports.updateUser = catchAsync(async (req, res, next) => {
-  const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+  const user = await User.findByIdAndUpdate(req.user._id, req.body, {
     new: true,
     runValidators: true,
   });
@@ -316,7 +316,7 @@ exports.updateUser = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteUser = catchAsync(async (req, res, next) => {
-  const user = await User.findByIdAndDelete(req.params.id);
+  const user = await User.findByIdAndDelete(req.user._id);
   if (!user) {
     return next(new AppError(`No user found with that ID: ${req.params.id}`, 404));
   }
