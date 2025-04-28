@@ -22,11 +22,12 @@ const userSchema = new mongoose.Schema({
   },
   photo: {
     type: String,
-    default: "default.jpg",
+    default:
+      "https://res.cloudinary.com/dhcbudcec/image/upload/fl_preserve_transparency/v1745833454/istockphoto-1337144146-612x612_fjkls9.jpg?_s=public-apps",
   },
   role: {
     type: String,
-    enum: ["user", "guide", "lead-guide", "admin"],
+    enum: ["user", "admin"],
     default: "user",
   },
   password: {
