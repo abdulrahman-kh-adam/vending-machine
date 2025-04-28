@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 const mongoURI =
@@ -9,13 +10,14 @@ mongoose.connect(mongoURI).then(() => {
 });
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/", (req, res) => {
   res.send("Server is running!");
 });
 
 app.use("/api/products", require("./Products/route"));
-app.use("/api/upload", require("./Upload/route"));
+app.use("/api/users", require("./Users/route"));
 
 const PORT = process.env.PORT || 3000;
 
