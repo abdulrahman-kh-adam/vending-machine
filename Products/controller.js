@@ -1,5 +1,11 @@
 const Product = require("./model");
 const catchAsync = require("../Utils/catchAsync");
+const multer = require("multer");
+const streamifier = require("streamifier");
+const cloudinary = require("../Utils/cloudinary");
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage }).single("image");
 
 exports.getAllProducts = catchAsync(async (req, res, next) => {
   const products = await Product.find();
@@ -26,20 +32,41 @@ exports.getProduct = catchAsync(async (req, res, next) => {
 });
 
 exports.createProduct = catchAsync(async (req, res, next) => {
-  const product = {
-    name: req.body.name,
-    price: req.body.price,
-    quantity: req.body.quantity,
-    imageUrl: req.body.imageUrl,
-  };
+  upload(req, res, async function (err) {
+    if (err) {
+      return res.status(400).json({ status: "fail", message: err.message });
+    }
 
-  const newProduct = await Product.create(product);
+    if (!req.file) {
+      return res.status(400).json({ status: "fail", message: "No image file uploaded" });
+    }
 
-  res.status(201).json({
-    status: "success",
-    data: {
-      product: newProduct,
-    },
+    // Upload image to Cloudinary
+    let cld_upload_stream = cloudinary.uploader.upload_stream({ folder: "uploads" }, async (error, result) => {
+      if (error) {
+        return res.status(500).json({ status: "fail", message: error.message });
+      }
+
+      // Create product after image uploaded
+      const product = {
+        name: req.body.name,
+        price: req.body.price,
+        quantity: req.body.quantity,
+        machineLocation: req.body.machineLocation,
+        imageUrl: result.secure_url, // image URL from cloudinary
+      };
+
+      const newProduct = await Product.create(product);
+
+      res.status(201).json({
+        status: "success",
+        data: {
+          product: newProduct,
+        },
+      });
+    });
+
+    streamifier.createReadStream(req.file.buffer).pipe(cld_upload_stream);
   });
 });
 
