@@ -1,6 +1,6 @@
 const Order = require("../Orders/model");
 const catchAsync = require("../Utils/catchAsync");
-const AppError = require("../Utils/appError");
+const AppError = require("../Utils/AppError");
 
 exports.createPayment = catchAsync(async (req, res, next) => {
   const headers = new Headers();

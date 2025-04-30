@@ -1,6 +1,6 @@
 const Order = require("./model");
 const catchAsync = require("../Utils/catchAsync");
-const AppError = require("../Utils/appError");
+const AppError = require("../Utils/AppError");
 
 exports.getAllOrders = catchAsync(async (req, res, next) => {
   const orders = await Order.find().populate("products.productId");
