@@ -6,17 +6,11 @@ router.post("/signup", controller.signup);
 router.post("/signin", controller.signin);
 router.get("/signout", controller.signout);
 
-router.patch("/update-password", controller.protect, controller.updatePassword);
+router.patch("/update-password", controller.updatePassword);
 
-router.get("/me", controller.protect, controller.getSelf);
-router.patch(
-  "/update-self",
-  controller.protect,
-  controller.uploadUserPhoto,
-  controller.resizeUserPhoto,
-  controller.updateSelf
-);
-router.delete("/delete-self", controller.protect, controller.deleteSelf);
+router.get("/me", controller.getSelf);
+router.patch("/update-self", controller.uploadUserPhoto, controller.resizeUserPhoto, controller.updateSelf);
+router.delete("/delete-self", controller.deleteSelf);
 
 router
   .route("/")
