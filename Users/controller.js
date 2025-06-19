@@ -80,11 +80,18 @@ const sendToken = (key, res, data) => {
     data.user.__v = undefined;
   }
 
-  res.status(200).json({
-    status: "success",
-    token,
-    data,
-  });
+  if (data) {
+    res.status(200).json({
+      status: "success",
+      token,
+      data,
+    });
+  } else {
+    res.status(200).json({
+      status: "success",
+      token,
+    });
+  }
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
@@ -111,7 +118,7 @@ exports.signin = catchAsync(async (req, res, next) => {
     return next(new AppError("Incorrect email or password!", 401));
   }
 
-  sendToken(user._id, res, null);
+  sendToken(user._id, res);
 });
 
 exports.signout = (req, res) => {
